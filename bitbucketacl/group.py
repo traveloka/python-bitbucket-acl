@@ -47,7 +47,6 @@ class Group(BitbucketAcl):
     # Remove member(s) from group, return booelan
     # True if nothing wrong happened, otherwise return False
     # with parameter username, can be list or string
-    # NOTE: for list as parameter hasn't tested yet
     def remove_member(self, username):
         flag = True
         if type(username) == list:
