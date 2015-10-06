@@ -46,17 +46,14 @@ class Group(BitbucketAcl):
 
     # Remove member(s) from group, return booelan
     # True if nothing wrong happened, otherwise return False
-    # with parameter username, can be list or string
-    def remove_member(self, username):
+    # with parameter username(s)
+    def remove_member(self, *usernames):
         flag = True
-        if type(username) == list:
-            for _username in username:
-                res = self.__delete_member(_username)
-                if res.status_code != 204:
-                    flag = False
-            return flag
-
-        return True if self.__delete_member(username).status_code == 204 else False
+        for username in usernames:
+            res = self.__delete_member(username)
+            if res.status_code != 204:
+                flag = False
+        return flag
 
     # Method for accessing access_api that recieves only one username
     # only for put a member
@@ -68,15 +65,12 @@ class Group(BitbucketAcl):
         return res
 
     # Add member(s) to group, return requests.response
-    # with parameter username, can be list or string
-    def add_member(self, username):
+    # with parameter username(s)
+    def add_member(self, *usernames):
         flag = True
-        if type(username) == list:
-            for _username in username:
-                res = self.__put_member(_username)
-                if res.status_code != 200:
-                    flag = False
-            return flag
+        for username in usernames:
+            res = self.__put_member(username)
+            if res.status_code != 200:
+                flag = False
+        return flag
 
-        return True if self.__put_member(username).status_code == 200 else False
-        pass
