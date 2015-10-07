@@ -1,5 +1,5 @@
 """
-	bitbucketacl module
+    bitbucketacl module
 """
 
 import requests
@@ -8,16 +8,13 @@ from requests_oauthlib import OAuth1
 
 
 class BitbucketAcl:
-    """
-        Base class to manage authentication and acccess Bitbucket API
-    """
+    """Base class to manage authentication and acccess Bitbucket API"""
 
     def __init__(self, username=None, password=None, conf='bitbucket.conf'):
-        """
-        Args:
-            username: username of account whose admin privilege in Team
-            passowrd: password of account
-            conf    : path to file for config file that has consumer key & secret
+        """Args:
+                username: username of account whose admin privilege in Team
+                passowrd: password of account
+                conf    : path to file for config file that has consumer key & secret
         """
         self.username = username
         self.password = password
@@ -46,18 +43,17 @@ class BitbucketAcl:
             }
 
 
-    # Method for request bitbucket api, return requests.response
-    # on default method for request is 'GET'
-    def access_api(self, url=None, method='GET', auth=self.auth, data=None, headers=None):
+    def access_api(self, url=None, method='GET', auth=None, data=None, headers=None):
         """Handle request Bitbucket api
-
-            Args:
-                url     : destination url
-                method  : access method e.g GET, PUT, DELETE etc.
-                auth    : authentication. default is the given auth
-                data    : additional data to be placed in body
-                headers : headers setting to be sent
+        Args:
+            url     : destination url
+            method  : access method e.g GET, PUT, DELETE etc.
+            auth    : authentication. default is the given auth
+            data    : additional data to be placed in body
+            headers : headers setting to be sent
         """
+        if auth is None:
+            auth = self.auth
         res = None
         try:
             res = requests.request(method=method or 'GET', url=url, auth=auth, data=data, headers=headers)
