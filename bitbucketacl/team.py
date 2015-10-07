@@ -12,7 +12,15 @@ class Team(BitbucketAcl):
     def __init__(self, team_slug=None, username=None, password=None):
         BitbucketAcl.__init__(self,username=username, password=password)
         self.team_slug = team_slug
+        self.__verify()
         pass
+
+    def __verify(self):
+        base_url = 'https://bitbucket.org/api/1.0/users/'
+        url = '{}{}'.format(base_url, self.team_slug)
+        res = self.access_api(url=url)
+        if res.status_code != 200:
+            raise ValueError('Invalid team_name')
 
     # Method to request api, call its super method
     # with parameter url, method type, data
@@ -28,7 +36,7 @@ class Team(BitbucketAcl):
             account_name = self.team_slug
             url = ('{}{}/{}/'.format(base_url, account_name, group_slug))
             res = self.access_api(url=url)
-            return Group(team=self, group_json=res.json())
+            return Group(team=self, slug=group_slug)
 
     # Get list of groups in team, return json
     # if succeed, res.status_code == 200
@@ -66,15 +74,13 @@ class Team(BitbucketAcl):
                 url = temp_res['next']
                 res = self.access_api(url=url)
                 temp_res = res.json()
-
             return repo
-
         return res.json()['values']
 
     # Put privilege for a group in a repository with role, return requests.response
     # with parameter group_slug, repo_slug and role
     # if succeed, res.status_code == 200
-    def grant_group_privilege(self, group_slug='', repo_slug='', role='read'):
+    def grant_group_privilege(self, group_slug, repo_slug, role='read'):
         base_url = 'https://bitbucket.org/api/1.0/group-privileges/'
         account_name = self.team_slug
         group_owner = account_name
@@ -87,7 +93,7 @@ class Team(BitbucketAcl):
     # Delete privilege for a group in repository, return requests.response
     # with parameter group_slug and remove privilege across team repositories
     # if succeed, res.status_code == 204
-    def remove_group_privilege(self, group_slug='', repo_slug=''):
+    def remove_group_privilege(self, group_slug, repo_slug):
         if repo_slug == '':
             return self.remove_all_group_privileges(group_slug=group_slug)
         base_url= 'https://bitbucket.org/api/1.0/group-privileges/'
@@ -101,11 +107,67 @@ class Team(BitbucketAcl):
     # Delete privilege for a group across all team repositories, return requests.response
     # with parameter group_slug
     # if succeed, res.status_code == 204
-    def remove_all_group_privileges(self, group_slug=''):
+    def remove_all_group_privileges(self, *group_slugs):
         base_url = 'https://bitbucket.org/api/1.0/group-privileges/'
         account_name = self.team_slug
         group_owner = account_name
-        url = ('{}{}/{}/{}'.format(base_url, account_name, group_owner, group_slug))
-        method = 'DELETE'
-        res = self.access_api(url=url, method=method)
+        res = []
+        for group_slug in group_slugs:
+            url = ('{}{}/{}/{}'.format(base_url, account_name, group_owner, group_slug))
+            method = 'DELETE'
+            res += self.access_api(url=url, method=method)
         return res
+
+    # Add member to multiple groups
+    # with parameter username and group_slugs (*args)
+    def add_member_to_groups(self, username, *group_slugs):
+        flag = True
+        for group_slug in group_slugs:
+            try:
+                group = Group(group_slug, self.team_slug)
+                group.add_member(username)
+            except Exception as e:
+                print e
+                flag = False
+
+        return flag
+
+
+    # Add multiple members to group
+    # with parameter group_slug and usernames (*args)
+    def add_members_to_group(self, group_slug, *usernames):
+        flag = True
+        try:
+            group = Group(group_slug, self.team_slug)
+        except Exception as e:
+            print e
+            flag = False
+        group.add_member(*usernames)
+        return flag
+
+    # Remove member from multiple groups
+    # with parameter username and group_slugs (*args)
+    def remove_member_from_groups(self, username, *groups_slug):
+        flag = True
+        for group_slug in group_slugs:
+            try:
+                group = Group(group_slug, self.team_slug)
+                group.remove_member(username)
+            except Exception as e:
+                print e
+                flag = False
+
+        return flag
+
+
+    # Remove multiple members from group
+    # with parameter group_slug and usernames (*args)
+    def remove_members_from_group(self, group_slug, *usernames):
+        flag = True
+        try:
+            group = Group(group_slug, self.team_slug)
+        except Exception as e:
+            print e
+            flag = False
+        group.remove_member(*usernames)
+        return flag

@@ -7,16 +7,30 @@ from .team import *
 
 class Group(BitbucketAcl):
 
-    def __init__(self, slug=None, team=None, group_json=None):
+    def __init__(self, slug=None, team_name='', team=None, group_json=None,):
         BitbucketAcl.__init__(self)
         self.slug = slug
         self.team = team
+        self.team_name = team.team_slug if team is not None else team_name
         self.members = None
         if group_json is not None:
-            print group_json
             self.name = group_json['name']
             self.slug = group_json['slug']
+
+        exist = self.__verify()
+        if not exist:
+            raise ValueError('Invalid group_slug or team_name')
+        self.get_members()
         pass
+
+    # Verify if given group_slug and team_name is valid
+    def __verify(self):
+        base_url = 'https://bitbucket.org/api/1.0/groups/'
+        url = '{}{}/{}'.format(base_url, self.team_name, self.slug)
+        res = self.access_api(url=url)
+        if res.status_code != 200:
+            return False
+        return True
 
     # Access api, call its super's method (BitbucketAcl)
     def access_api(self, url=None, method='', data=None):
@@ -27,12 +41,11 @@ class Group(BitbucketAcl):
     def get_members(self):
         if self.members is None:
             base_url = 'https://bitbucket.org/api/1.0/groups/'
-            account_name = self.team.team_slug
+            account_name = self.team_name
             group_slug = self.slug
             url = ('{}{}/{}/members/'.format(base_url, account_name, group_slug))
             res = self.access_api(url=url)
             self.members = res.json()
-            return res
         return self.members
 
 
@@ -40,7 +53,7 @@ class Group(BitbucketAcl):
     # only for delete a member purpose
     def __delete_member(self, username):
         base_url = 'https://bitbucket.org/api/1.0/groups/'
-        url = ('{}{}/{}/members/{}'.format(base_url, self.team.team_slug, self.slug, username))
+        url = ('{}{}/{}/members/{}'.format(base_url, self.team_name, self.slug, username))
         res = self.access_api(method='DELETE', url=url)
         return res
 
@@ -60,7 +73,7 @@ class Group(BitbucketAcl):
     # for cleaner code :)
     def __put_member(self, username):
         base_url = 'https://bitbucket.org/api/1.0/groups/'
-        url = ('{}{}/{}/members/{}/'.format(base_url, self.team.team_slug, self.slug, username))
+        url = ('{}{}/{}/members/{}/'.format(base_url, self.team_name, self.slug, username))
         res = self.access_api(url=url, method='PUT', data='{}')
         return res
 
