@@ -19,15 +19,16 @@ class BitbucketAcl:
         self.username = username
         self.password = password
         self.auth = {}
+        self.conf = conf
+        self.load_authentication()
 
-
-    def load_authentiocation(self):
+    def load_authentication(self):
         """Setup authentication for Bitbucket
         use basic auth or OAuth1
         """
         # Try to load config file to set OAuth1 as its authentication
         try:
-            self.config = yaml.load(file(conf))
+            self.config = yaml.load(file(self.conf))
             if self.config['CONSUMER_KEY'] is not None and self.config['CONSUMER_KEY'] != '':
                 if self.config['CONSUMER_SECRET'] is not None and self.config['CONSUMER_SECRET'] != '':
                     self.auth = OAuth1(self.config['CONSUMER_KEY'],self.config['CONSUMER_SECRET'])

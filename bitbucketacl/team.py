@@ -140,7 +140,7 @@ class Team(BitbucketAcl):
 
 
     def remove_all_group_privileges(self, *group_slugs):
-        """Delete privilege for a group across al team repositories
+        """Delete privilege for a group across all team repositories
                 Args:
                     *group_slugs: list of group slugs that its privilege will be removed
                 Return:
@@ -153,7 +153,8 @@ class Team(BitbucketAcl):
         for group_slug in group_slugs:
             url = ('{}{}/{}/{}'.format(base_url, account_name, group_owner, group_slug))
             method = 'DELETE'
-            res += self.access_api(url=url, method=method)
+            _res = self.access_api(url=url, method=method)
+            res.append(_res.status_code)
         return res
 
 
