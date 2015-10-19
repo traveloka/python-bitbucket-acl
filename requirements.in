@@ -1,4 +1,7 @@
+click
+ndg-httpsclient 
+pyasn1
+pyopenssl 
 pyyaml
 requests
 requests-oauthlib
-

@@ -14,7 +14,8 @@ class BitbucketAcl:
         """Args:
                 username: username of account whose admin privilege in Team
                 passowrd: password of account
-                conf    : path to file for config file that has consumer key & secret
+                conf    : path to file for config file
+                            that has consumer key & secret
         """
         self.username = username
         self.password = password
@@ -29,9 +30,12 @@ class BitbucketAcl:
         # Try to load config file to set OAuth1 as its authentication
         try:
             self.config = yaml.load(file(self.conf))
-            if self.config['CONSUMER_KEY'] is not None and self.config['CONSUMER_KEY'] != '':
-                if self.config['CONSUMER_SECRET'] is not None and self.config['CONSUMER_SECRET'] != '':
-                    self.auth = OAuth1(self.config['CONSUMER_KEY'],self.config['CONSUMER_SECRET'])
+            if (self.config['CONSUMER_KEY'] is not None and
+                    self.config['CONSUMER_KEY'] != ''):
+                if (self.config['CONSUMER_SECRET'] is not None and
+                        self.config['CONSUMER_SECRET'] != ''):
+                    self.auth = OAuth1(self.config['CONSUMER_KEY'],
+                                       self.config['CONSUMER_SECRET'])
         except Exception, e:
             pass
 
@@ -43,8 +47,9 @@ class BitbucketAcl:
                 'password': self.password
             }
 
-
-    def access_api(self, url=None, method='GET', auth=None, data=None, headers=None):
+    def access_api(
+            self, url=None, method='GET', auth=None, data=None, headers=None
+    ):
         """Handle request Bitbucket api
         Args:
             url     : destination url
@@ -57,7 +62,10 @@ class BitbucketAcl:
             auth = self.auth
         res = None
         try:
-            res = requests.request(method=method or 'GET', url=url, auth=auth, data=data, headers=headers)
+            res = requests.request(method=method or 'GET',
+                                   url=url, auth=auth,
+                                   data=data,
+                                   headers=headers)
             pass
         except Exception, e:
             raise e
